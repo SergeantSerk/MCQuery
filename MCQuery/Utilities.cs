@@ -5,55 +5,24 @@ namespace MCQuery
 {
     public static class Utilities
     {
-        public static void WriteVarLong(Stream stream, long value)
+        #region VarInt (https://wiki.vg/Protocol#VarInt_and_VarLong)
+        public static void WriteVarInt(Stream stream, int value)
         {
+            // Converting int to uint is necessary to preserve the sign bit
+            // when performing bit shifting
+            uint actual = (uint)value;
             do
             {
-                byte temp = (byte)(value & 0b01111111);
-                // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
-                value >>= 7;
-                if (value != 0)
+                byte temp = (byte)(actual & 0b01111111);
+                // Note: >>> means that the sign bit is shifted with the
+                // rest of the number rather than being left alone
+                actual >>= 7;
+                if (actual != 0)
                 {
                     temp |= 0b10000000;
                 }
                 stream.WriteByte(temp);
-            } while (value != 0);
-        }
-
-        public static void WriteVarInt(Stream stream, uint value)
-        {
-            do
-            {
-                byte temp = (byte)(value & 0b01111111);
-                // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
-                value >>= 7;
-                if (value != 0)
-                {
-                    temp |= 0b10000000;
-                }
-                stream.WriteByte(temp);
-            } while (value != 0);
-        }
-
-        public static long ReadVarLong(Stream stream)
-        {
-            int numRead = 0;
-            long result = 0;
-            byte read;
-            do
-            {
-                read = (byte)stream.ReadByte();
-                int value = read & 0b01111111;
-                result |= value << (7 * numRead);
-
-                numRead++;
-                if (numRead > 10)
-                {
-                    throw new FormatException("VarLong is too big");
-                }
-            } while ((read & 0b10000000) != 0);
-
-            return result;
+            } while (actual != 0);
         }
 
         public static int ReadVarInt(Stream stream)
@@ -76,5 +45,6 @@ namespace MCQuery
 
             return result;
         }
+        #endregion
     }
 }

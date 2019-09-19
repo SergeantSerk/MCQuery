@@ -13,7 +13,7 @@ namespace MCQuery
         /// <summary>
         /// Protocol number for latest, stable Minecraft.
         /// </summary>
-        public static uint Protocol = 498;
+        public static int Protocol = 498;
 
         private static Stopwatch stopwatch;
         private static byte[] pingBytes;
@@ -56,7 +56,7 @@ namespace MCQuery
         }
         #endregion
 
-        private static TcpClient InitialiseConnection(string server, ushort port, uint state)
+        private static TcpClient InitialiseConnection(string server, ushort port, int state)
         {
             TcpClient client = new TcpClient();
             client.Client.Blocking = true;
@@ -72,7 +72,7 @@ namespace MCQuery
         /// <param name="state">The state command that follows after this handshake (usually 1 for status, 2 for login).</param>
         /// <param name="server">The server to handshake with.</param>
         /// <param name="port">The port of the Minecraft server.</param>
-        private static void Handshake(NetworkStream network, uint state, string server, ushort port)
+        private static void Handshake(NetworkStream network, int state, string server, ushort port)
         {
             using (MemoryStream packet = new MemoryStream())
             using (MemoryStream data = new MemoryStream())
@@ -84,7 +84,7 @@ namespace MCQuery
                     data.Write(BitConverter.GetBytes(port));                    // Server port
                     Utilities.WriteVarInt(data, state);                         // State command
                 }
-                Utilities.WriteVarInt(packet, (uint)(data.Length + 1));         // Write packet length (Packet ID + Inner Packet)
+                Utilities.WriteVarInt(packet, (int)data.Length + 1);            // Write packet length (Packet ID + Inner Packet)
                 Utilities.WriteVarInt(packet, 0);                               // Packet ID (0 = Handshake at this state)
                 data.Seek(0, SeekOrigin.Begin);                                 // Seek to beginning and copy inner packet to actual packet
                 data.CopyTo(packet);
@@ -104,7 +104,7 @@ namespace MCQuery
                     pingBytes = BitConverter.GetBytes(ticks);
                     data.Write(pingBytes);
                 }
-                Utilities.WriteVarInt(packet, (uint)(data.Length + 1));
+                Utilities.WriteVarInt(packet, (int)data.Length + 1);
                 Utilities.WriteVarInt(packet, 1);
                 data.Seek(0, SeekOrigin.Begin);
                 data.CopyTo(packet);
@@ -147,7 +147,7 @@ namespace MCQuery
             using (MemoryStream packet = new MemoryStream())
             using (MemoryStream data = new MemoryStream())
             {
-                Utilities.WriteVarInt(packet, (uint)(data.Length + 1)); // Packet ID + Packet
+                Utilities.WriteVarInt(packet, (int)data.Length + 1);    // Packet ID + Packet
                 Utilities.WriteVarInt(packet, 0);                       // Packet ID
                 data.Seek(0, SeekOrigin.Begin);                         // Seek to beginning and copy inner packet to actual packet
                 data.CopyTo(packet);
