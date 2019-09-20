@@ -1,6 +1,5 @@
 # MCQuery
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FSergeantSerk%2FMCQuery.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FSergeantSerk%2FMCQuery?ref=badge_shield)
-
 A C# library for querying/pinging Minecraft servers.
 
 # Sample Usage
