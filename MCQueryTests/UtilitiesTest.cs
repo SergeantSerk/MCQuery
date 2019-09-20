@@ -10,6 +10,16 @@ namespace MCQueryTests
     public class UtilitiesTest
     {
         [TestMethod]
+        public void PingTest()
+        {
+            string server = "mc.hypixel.net";
+            ushort port = 25565;
+            double ping = Minecraft.Ping(server, port);
+            if (ping <= 0)
+                throw new InvalidDataException("Ping cannot be equal to or less than 0.");
+        }
+
+        [TestMethod]
         public void WriteVarIntTest()
         {
             int[] testCases = new int[9]

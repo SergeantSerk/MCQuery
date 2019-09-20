@@ -11,6 +11,11 @@
     <FileVersion>0.0.1.0</FileVersion>
     <Company>Crystalize</Company>
     <Authors>SergeantSerk</Authors>
+    <Description>A C# library for querying/pinging Minecraft servers.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/SergeantSerk/MCQuery</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SergeantSerk/MCQuery</RepositoryUrl>
+    <PackageTags>minecraft, query, ping, status</PackageTags>
   </PropertyGroup>
 
 </Project>

@@ -32,7 +32,10 @@ namespace MCQuery
             byte read;
             do
             {
-                read = (byte)stream.ReadByte();
+                int r = stream.ReadByte();
+                if (r == -1) break;
+
+                read = (byte)r;
                 int value = read & 0b01111111;
                 result |= (value << (7 * numRead));
 
@@ -43,6 +46,7 @@ namespace MCQuery
                 }
             } while ((read & 0b10000000) != 0);
 
+            if (numRead == 0) throw new InvalidOperationException("Expected a VarInt, none was read.");
             return result;
         }
         #endregion

@@ -25,14 +25,30 @@ namespace MCQuery
         /// <param name="server">The server address to query.</param>
         /// <param name="port">The port the Minecraft server is running on.</param>
         /// <returns>The elapsed time between sending the ping and receiving the ping, in milliseconds.</returns>
-        public static double Ping(string server, ushort port = 25565)
+        public static double Ping(string server, ushort port)
         {
             double ping;
-            using (TcpClient client = InitialiseConnection(server, port, 1))
-            using (NetworkStream network = client.GetStream())
+            // Attempt to ping, without requesting status (this does not work on some servers)
+            try
             {
-                SendPing(network);
-                ping = ReceivePing(network);
+                using (TcpClient client = InitialiseConnection(server, port, 1))
+                using (NetworkStream network = client.GetStream())
+                {
+                    SendPing(network);
+                    ping = ReceivePing(network);
+                }
+            }
+            catch (Exception)
+            {
+                // If server requires status request first, send that, then ping
+                using (TcpClient client = InitialiseConnection(server, port, 1))
+                using (NetworkStream network = client.GetStream())
+                {
+                    SendStatusRequest(network);
+                    ReceiveStatusRequest(network);
+                    SendPing(network);
+                    ping = ReceivePing(network);
+                }
             }
             return ping;
         }
@@ -43,7 +59,7 @@ namespace MCQuery
         /// <param name="server">The server address to query.</param>
         /// <param name="port">The port the Minecraft server is running on.</param>
         /// <returns>The query response, in JSON.</returns>
-        public static string Status(string server, ushort port = 25565)
+        public static string Status(string server, ushort port)
         {
             string json = string.Empty;
             using (TcpClient client = InitialiseConnection(server, port, 1))
@@ -56,6 +72,13 @@ namespace MCQuery
         }
         #endregion
 
+        /// <summary>
+        /// Initialise a connection to the specified server and set up connection by performing a handshake.
+        /// </summary>
+        /// <param name="server">The server to connect and handshake with.</param>
+        /// <param name="port">The port of the Minecraft server.</param>
+        /// <param name="state">The next state that should follow after the handshake, usually 1 for status, 2 for login.</param>
+        /// <returns>A <see cref="TcpClient"/> is returned which has an initialised connection that is set up.</returns>
         private static TcpClient InitialiseConnection(string server, ushort port, int state)
         {
             TcpClient client = new TcpClient();
@@ -78,61 +101,82 @@ namespace MCQuery
             using (MemoryStream data = new MemoryStream())
             {
                 {
-                    Utilities.WriteVarInt(data, Protocol);                      // Protocol
-                    data.WriteByte((byte)Encoding.ASCII.GetByteCount(server));  // Address length
-                    data.Write(Encoding.ASCII.GetBytes(server));                // Server address
-                    data.Write(BitConverter.GetBytes(port));                    // Server port
-                    Utilities.WriteVarInt(data, state);                         // State command
+                    // Protocol
+                    Utilities.WriteVarInt(data, Protocol);
+                    // Address Length
+                    data.WriteByte((byte)Encoding.ASCII.GetByteCount(server));
+                    // Server address
+                    data.Write(Encoding.ASCII.GetBytes(server));
+                    // Server port
+                    data.Write(BitConverter.GetBytes(port));
+                    // State command
+                    Utilities.WriteVarInt(data, state);
                 }
-                Utilities.WriteVarInt(packet, (int)data.Length + 1);            // Write packet length (Packet ID + Inner Packet)
-                Utilities.WriteVarInt(packet, 0);                               // Packet ID (0 = Handshake at this state)
-                data.Seek(0, SeekOrigin.Begin);                                 // Seek to beginning and copy inner packet to actual packet
+                // Write packet length (Packet ID + Inner Packet)
+                Utilities.WriteVarInt(packet, (int)data.Length + 1);
+                // Packet ID (0 = Handshake at this state)
+                Utilities.WriteVarInt(packet, 0);
+                // Seek to beginning and copy inner packet to actual packet
+                data.Seek(0, SeekOrigin.Begin);
                 data.CopyTo(packet);
-                packet.Seek(0, SeekOrigin.Begin);                               // Seek to beginning and transmit packet to server
+                // Seek to beginning and transmit packet to server
+                packet.Seek(0, SeekOrigin.Begin);
                 packet.CopyTo(network);
             }
         }
 
         private static void SendPing(NetworkStream network)
         {
+            // Prepare new stopwatch for measuring ping
             stopwatch = new Stopwatch();
             using (MemoryStream packet = new MemoryStream())
             using (MemoryStream data = new MemoryStream())
             {
                 {
+                    // Get some long to send to the server
                     long ticks = DateTime.UtcNow.Ticks;
+                    // Convert that into long bytes
                     pingBytes = BitConverter.GetBytes(ticks);
+                    // Write long into data stream
                     data.Write(pingBytes);
                 }
+                // Write packet length (including packet ID)
                 Utilities.WriteVarInt(packet, (int)data.Length + 1);
+                // Write packet ID (1 for ping state)
                 Utilities.WriteVarInt(packet, 1);
+                // Seek to the start and copy over to packet stream
                 data.Seek(0, SeekOrigin.Begin);
                 data.CopyTo(packet);
+                // Seek to the start and copy over to network stream
                 packet.Seek(0, SeekOrigin.Begin);
+                // Begin stopwatch to measure ping (from when data is being transmitted)
                 stopwatch.Start();
                 packet.CopyTo(network);
-                stopwatch.Stop();
             }
         }
 
         private static double ReceivePing(NetworkStream network)
         {
-            stopwatch.Stop();
+            // Store ping for return
             double ping;
             using (MemoryStream packet = new MemoryStream())
             using (MemoryStream data = new MemoryStream())
             {
-                stopwatch.Start();
+                // Read packet length from first VarInt
                 int packetLength = Utilities.ReadVarInt(network);
+                // Read packet ID from next VarInt
                 int packetID = Utilities.ReadVarInt(network);
-                stopwatch.Stop();
+                if (packetID != 1)
+                    throw new InvalidDataException($"Expected packet ID 1, got {packetID}.");
+
                 byte[] pongBytes = new byte[Math.Max(8, packetLength - 1)];
-                stopwatch.Start();
                 network.Read(pongBytes);
                 stopwatch.Stop();
                 ping = stopwatch.Elapsed.TotalMilliseconds;
                 stopwatch = null;
-                if (!pingBytes.SequenceEqual(pongBytes)) throw new InvalidDataException("Sent ping bytes did not match received pong bytes.");
+
+                if (!pingBytes.SequenceEqual(pongBytes))
+                    throw new InvalidDataException("Sent ping bytes did not match received pong bytes.");
             }
             return ping;
         }
