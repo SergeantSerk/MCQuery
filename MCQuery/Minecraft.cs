@@ -169,12 +169,15 @@ namespace MCQuery
                 if (packetID != 1)
                     throw new InvalidDataException($"Expected packet ID 1, got {packetID}.");
 
+                // Parse the received ping bytes
                 byte[] pongBytes = new byte[Math.Max(8, packetLength - 1)];
                 network.Read(pongBytes);
+                // Stop stopwatch, no need to measure from this point onwards
                 stopwatch.Stop();
                 ping = stopwatch.Elapsed.TotalMilliseconds;
                 stopwatch = null;
 
+                // Check if the sent bytes matches the bytes received
                 if (!pingBytes.SequenceEqual(pongBytes))
                     throw new InvalidDataException("Sent ping bytes did not match received pong bytes.");
             }
@@ -191,11 +194,16 @@ namespace MCQuery
             using (MemoryStream packet = new MemoryStream())
             using (MemoryStream data = new MemoryStream())
             {
-                Utilities.WriteVarInt(packet, (int)data.Length + 1);    // Packet ID + Packet
-                Utilities.WriteVarInt(packet, 0);                       // Packet ID
-                data.Seek(0, SeekOrigin.Begin);                         // Seek to beginning and copy inner packet to actual packet
+                // No data, only packet ID to indicate status request
+                // Packet ID + Packet
+                Utilities.WriteVarInt(packet, (int)data.Length + 1);
+                // Packet ID
+                Utilities.WriteVarInt(packet, 0);
+                // Seek to beginning and copy inner packet to actual packet
+                data.Seek(0, SeekOrigin.Begin);
                 data.CopyTo(packet);
-                packet.Seek(0, SeekOrigin.Begin);                       // Seek to beginning and transmit packet to server
+                // Seek to beginning and transmit packet to server
+                packet.Seek(0, SeekOrigin.Begin);
                 packet.CopyTo(network);
             }
         }
@@ -206,15 +214,20 @@ namespace MCQuery
             using (MemoryStream packet = new MemoryStream())
             using (MemoryStream data = new MemoryStream())
             {
-                int packetLength = Utilities.ReadVarInt(network);                   // Packet length
-                int packetID = Utilities.ReadVarInt(network);                       // Packet ID
-                int responseLength = Utilities.ReadVarInt(network);                 // Response length
-                byte[] responseBytes = new byte[Math.Min(32767, responseLength)];   // Response
+                // Get packet length
+                int packetLength = Utilities.ReadVarInt(network);
+                // Get packet ID
+                int packetID = Utilities.ReadVarInt(network);
+                // Get response length
+                int responseLength = Utilities.ReadVarInt(network);
+                // Allocate responseLength bytes amount of memory, or at most 32767 bytes
+                byte[] responseBytes = new byte[Math.Min(32767, responseLength)];
 
                 // Solution courtesy of Marc Gravell (https://stackoverflow.com/a/9461017)
+                // Read in responseBytes.Length amount of bytes from the network
                 int read;
                 int offset = 0;
-                int count = responseLength;
+                int count = responseBytes.Length;
                 while (count > 0 && (read = network.Read(responseBytes, offset, count)) > 0)
                 {
                     offset += read;
