@@ -1,4 +1,4 @@
-# MCQuery [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FSergeantSerk%2FMCQuery.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FSergeantSerk%2FMCQuery?ref=badge_shield)
+# MCQuery [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FSergeantSerk%2FMCQuery.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FSergeantSerk%2FMCQuery?ref=badge_shield) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/962a271ffb45453f9be089d88021aabc)](https://www.codacy.com/manual/SergeantSerk/MCQuery?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SergeantSerk/MCQuery&amp;utm_campaign=Badge_Grade)
 
 # Description
 A C# library for querying/pinging Minecraft servers.
