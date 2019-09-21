@@ -12,9 +12,10 @@ namespace MCQueryTests
         [TestMethod]
         public void PingTest()
         {
-            string server = "mc.hypixel.net";
+            string address = "mc.hypixel.net";
             ushort port = 25565;
-            double ping = Minecraft.Ping(server, port);
+            MCServer server = new MCServer(address, port);
+            double ping = server.Ping();
             if (ping <= 0)
             {
                 throw new InvalidDataException("Ping cannot be equal to or less than 0.");
@@ -24,7 +25,7 @@ namespace MCQueryTests
         [TestMethod]
         public void WriteVarIntTest()
         {
-            int[] testCases = new int[]
+            int[] testCases = new[]
             {
                 0,
                 1,
@@ -79,7 +80,7 @@ namespace MCQueryTests
                 new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, },   // VarInt(-1)
                 new byte[] { 0x80, 0x80, 0x80, 0x80, 0x08 }     // VarInt(-2147483648)
             };
-            int[] testCasesResults = new int[]
+            int[] testCasesResults = new[]
             {
                 0,
                 1,

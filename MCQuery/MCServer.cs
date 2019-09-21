@@ -8,30 +8,47 @@ using System.Text;
 
 namespace MCQuery
 {
-    public static class Minecraft
+    public class MCServer
     {
-        /// <summary>
-        /// Protocol number for latest, stable Minecraft.
-        /// </summary>
-        public static int Protocol = 498;
-
         private static Stopwatch stopwatch;
         private static byte[] pingBytes;
 
+        /// <summary>
+        /// Address of the Minecraft server.
+        /// </summary>
+        public string Address { get; private set; }
+
+        /// <summary>
+        /// Port of the Minecraft server.
+        /// </summary>
+        public ushort Port { get; private set; }
+
+        /// <summary>
+        /// Protocol number for latest, stable Minecraft.
+        /// </summary>
+        public int Protocol = -1;
+
         #region Public Methods
+        public MCServer(string Address, ushort Port, int Protocol = -1)
+        {
+            this.Address = Address;
+            this.Port = Port;
+            this.Protocol = Protocol;
+        }
+
         /// <summary>
         /// Pings the specified server.
         /// </summary>
         /// <param name="server">The server address to query.</param>
         /// <param name="port">The port the Minecraft server is running on.</param>
         /// <returns>The elapsed time between sending the ping and receiving the ping, in milliseconds.</returns>
-        public static double Ping(string server, ushort port)
+        public double Ping()
         {
             double ping;
             // Attempt to ping, without requesting status (this does not work on some servers)
             try
             {
-                using (TcpClient client = InitialiseConnection(server, port, 1))
+                using (TcpClient client = InitialiseConnection(1))
                 using (NetworkStream network = client.GetStream())
                 {
                     SendPing(network);
@@ -41,7 +58,7 @@ namespace MCQuery
             catch (Exception)
             {
                 // If server requires status request first, send that, then ping
-                using (TcpClient client = InitialiseConnection(server, port, 1))
+                using (TcpClient client = InitialiseConnection(1))
                 using (NetworkStream network = client.GetStream())
                 {
                     SendStatusRequest(network);
@@ -59,10 +76,10 @@ namespace MCQuery
         /// <param name="server">The server address to query.</param>
         /// <param name="port">The port the Minecraft server is running on.</param>
         /// <returns>The query response, in JSON.</returns>
-        public static string Status(string server, ushort port)
+        public string Status()
         {
             string json = string.Empty;
-            using (TcpClient client = InitialiseConnection(server, port, 1))
+            using (TcpClient client = InitialiseConnection(1))
             using (NetworkStream network = client.GetStream())
             {
                 SendStatusRequest(network);
@@ -79,12 +96,12 @@ namespace MCQuery
         /// <param name="port">The port of the Minecraft server.</param>
         /// <param name="state">The next state that should follow after the handshake, usually 1 for status, 2 for login.</param>
         /// <returns>A <see cref="TcpClient"/> is returned which has an initialised connection that is set up.</returns>
-        private static TcpClient InitialiseConnection(string server, ushort port, int state)
+        private TcpClient InitialiseConnection(int state)
         {
             TcpClient client = new TcpClient();
             client.Client.Blocking = true;
-            client.Connect(server, port);
-            Handshake(client.GetStream(), state, server, port);
+            client.Connect(Address, Port);
+            Handshake(client.GetStream(), state);
             return client;
         }
 
@@ -95,7 +112,7 @@ namespace MCQuery
         /// <param name="state">The state command that follows after this handshake (usually 1 for status, 2 for login).</param>
         /// <param name="server">The server to handshake with.</param>
         /// <param name="port">The port of the Minecraft server.</param>
-        private static void Handshake(NetworkStream network, int state, string server, ushort port)
+        private void Handshake(NetworkStream network, int state)
         {
             using (MemoryStream packet = new MemoryStream())
             using (MemoryStream data = new MemoryStream())
@@ -104,11 +121,11 @@ namespace MCQuery
                     // Protocol
                     Utilities.WriteVarInt(data, Protocol);
                     // Address Length
-                    data.WriteByte((byte)Encoding.ASCII.GetByteCount(server));
+                    data.WriteByte((byte)Encoding.ASCII.GetByteCount(Address));
                     // Server address
-                    data.Write(Encoding.ASCII.GetBytes(server));
+                    data.Write(Encoding.ASCII.GetBytes(Address));
                     // Server port
-                    data.Write(BitConverter.GetBytes(port));
+                    data.Write(BitConverter.GetBytes(Port));
                     // State command
                     Utilities.WriteVarInt(data, state);
                 }
@@ -125,7 +142,7 @@ namespace MCQuery
             }
         }
 
-        private static void SendPing(NetworkStream network)
+        private void SendPing(NetworkStream network)
         {
             // Prepare new stopwatch for measuring ping
             stopwatch = new Stopwatch();
@@ -155,7 +172,7 @@ namespace MCQuery
             }
         }
 
-        private static double ReceivePing(NetworkStream network)
+        private double ReceivePing(NetworkStream network)
         {
             // Store ping for return
             double ping;
@@ -192,7 +209,7 @@ namespace MCQuery
         /// Sends a status request to the connected network stream. (https://wiki.vg/Protocol#Status)
         /// </summary>
         /// <param name="network">The network stream that is connected to the Minecraft server.</param>
-        private static void SendStatusRequest(NetworkStream network)
+        private void SendStatusRequest(NetworkStream network)
         {
             // Initialise packet construction
             using (MemoryStream packet = new MemoryStream())
@@ -212,7 +229,7 @@ namespace MCQuery
             }
         }
 
-        private static string ReceiveStatusRequest(NetworkStream network)
+        private string ReceiveStatusRequest(NetworkStream network)
         {
             string json = string.Empty;
             using (MemoryStream packet = new MemoryStream())
