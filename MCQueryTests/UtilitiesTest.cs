@@ -16,13 +16,15 @@ namespace MCQueryTests
             ushort port = 25565;
             double ping = Minecraft.Ping(server, port);
             if (ping <= 0)
+            {
                 throw new InvalidDataException("Ping cannot be equal to or less than 0.");
+            }
         }
 
         [TestMethod]
         public void WriteVarIntTest()
         {
-            int[] testCases = new int[9]
+            int[] testCases = new int[]
             {
                 0,
                 1,
@@ -34,7 +36,7 @@ namespace MCQueryTests
                 -1,
                 -2147483648
             };
-            byte[][] testCasesResults = new byte[9][]
+            byte[][] testCasesResults = new byte[][]
             {
                 new byte[] { 0x00 },                            // VarInt(0)
                 new byte[] { 0x01 },                            // VarInt(1)
@@ -55,7 +57,9 @@ namespace MCQueryTests
                     Utilities.WriteVarInt(memory, testCases[i]);        // Write integer (VarInt) to stream
                     byte[] result = memory.ToArray();
                     if (!testCasesResults[i].SequenceEqual(result))
+                    {
                         Assert.Fail($"Expected {BitConverter.ToString(testCasesResults[i])}, got {BitConverter.ToString(result)}");
+                    }
                 }
             }
         }
@@ -63,7 +67,7 @@ namespace MCQueryTests
         [TestMethod]
         public void ReadVarIntTest()
         {
-            byte[][] testCases = new byte[9][]
+            byte[][] testCases = new byte[][]
             {
                 new byte[] { 0x00 },                            // VarInt(0)
                 new byte[] { 0x01 },                            // VarInt(1)
@@ -75,7 +79,7 @@ namespace MCQueryTests
                 new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, },   // VarInt(-1)
                 new byte[] { 0x80, 0x80, 0x80, 0x80, 0x08 }     // VarInt(-2147483648)
             };
-            int[] testCasesResults = new int[9]
+            int[] testCasesResults = new int[]
             {
                 0,
                 1,
@@ -94,7 +98,9 @@ namespace MCQueryTests
                 {
                     int result = ReadVarIntHelper(memory, testCases[i]);
                     if (result != testCasesResults[i])
+                    {
                         Assert.Fail($"Expected {testCasesResults[i]}, got {result}.");
+                    }
                 }
             }
         }
@@ -105,7 +111,7 @@ namespace MCQueryTests
             return Utilities.ReadVarInt(stream);    // Get VarInt from stream
         }
 
-        private void StreamHelper(Stream stream, byte[] data)
+        private static void StreamHelper(Stream stream, byte[] data)
         {
             stream.SetLength(0);                // Reset stream
             stream.Write(data);                 // Write test bytes

@@ -167,7 +167,9 @@ namespace MCQuery
                 // Read packet ID from next VarInt
                 int packetID = Utilities.ReadVarInt(network);
                 if (packetID != 1)
+                {
                     throw new InvalidDataException($"Expected packet ID 1, got {packetID}.");
+                }
 
                 // Parse the received ping bytes
                 byte[] pongBytes = new byte[Math.Max(8, packetLength - 1)];
@@ -179,7 +181,9 @@ namespace MCQuery
 
                 // Check if the sent bytes matches the bytes received
                 if (!pingBytes.SequenceEqual(pongBytes))
+                {
                     throw new InvalidDataException("Sent ping bytes did not match received pong bytes.");
+                }
             }
             return ping;
         }
@@ -216,10 +220,26 @@ namespace MCQuery
             {
                 // Get packet length
                 int packetLength = Utilities.ReadVarInt(network);
+                // 4 == At least one byte for Packet ID + Response length + minimum JSON "[]"
+                if (packetLength <= 4)
+                {
+                    throw new InvalidDataException($"Packet length is of unusual size ({packetLength} bytes).");
+                }
+
                 // Get packet ID
                 int packetID = Utilities.ReadVarInt(network);
+                if (packetID != 0)
+                {
+                    throw new InvalidDataException($"Expected packet ID 0, got {packetID}.");
+                }
+
                 // Get response length
                 int responseLength = Utilities.ReadVarInt(network);
+                if (responseLength < 0)
+                {
+                    throw new InvalidDataException($"Response length size was less than 0.");
+                }
+
                 // Allocate responseLength bytes amount of memory, or at most 32767 bytes
                 byte[] responseBytes = new byte[Math.Min(32767, responseLength)];
 
