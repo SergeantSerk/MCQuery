@@ -9,7 +9,7 @@ See MCQueryConsole for sample console or below.
 using MCQuery;
 using System;
 
-namespace MCQueryConsole
+namespace Sample
 {
     public class Program
     {
