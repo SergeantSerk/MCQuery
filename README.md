@@ -9,7 +9,7 @@ See MCQueryConsole for sample console or below.
 using MCQuery;
 using System;
 
-namespace Sample
+namespace MCQueryConsole
 {
     public class Program
     {
@@ -21,13 +21,12 @@ namespace Sample
             MCServer server = new MCServer(address, port);
             string json = server.Status();
             double ping = server.Ping();
-            Console.WriteLine($"Server: {server}:{port}");
+            Console.WriteLine($"Server: {server.Address}:{server.Port}");
             Console.WriteLine($"Ping:   {ping}ms");
             Console.WriteLine($"Status: {json}");
         }
     }
 }
-
 ```
 
 ## Installation
