@@ -105,7 +105,7 @@ namespace MCQueryTests
             }
         }
 
-        private int ReadVarIntHelper(Stream stream, byte[] data)
+        private static int ReadVarIntHelper(Stream stream, byte[] data)
         {
             StreamHelper(stream, data);             // Setup stream for testing
             return Utilities.ReadVarInt(stream);    // Get VarInt from stream
