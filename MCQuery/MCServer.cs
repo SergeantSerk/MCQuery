@@ -10,8 +10,8 @@ namespace MCQuery
 {
     public class MCServer
     {
-        private static Stopwatch stopwatch;
-        private static byte[] pingBytes;
+        private Stopwatch stopwatch;
+        private byte[] pingBytes;
 
         /// <summary>
         /// Address of the Minecraft server.
@@ -26,10 +26,15 @@ namespace MCQuery
         /// <summary>
         /// Protocol number for latest, stable Minecraft.
         /// </summary>
-        public int Protocol = -1;
+        public int Protocol { get; private set; }
 
         #region Public Methods
-        public MCServer(string Address, ushort Port, int Protocol = -1)
+        public MCServer(string Address, ushort Port) : this(Address, Port, -1)
+        {
+
+        }
+
+        public MCServer(string Address, ushort Port, int Protocol)
         {
             this.Address = Address;
             this.Port = Port;
