@@ -5,7 +5,7 @@ A C# library for querying/pinging Minecraft servers.
 
 # Sample Usage
 See MCQueryConsole for sample console or below.
-```
+```C#
 using MCQuery;
 using System;
 
@@ -34,7 +34,6 @@ namespace Sample
 For the latest features (bleeding-edge), clone this repository and open the **`MCQuery/MCQuery.sln`** solution in Visual Studio. Build using the **Release** configuration and use the **`MCQuery/bin/Release/netcoreapp(x)/MCQuery.dll`** file in your project.
 
 Alternatively, you can download the DLL (not always up-to-date) from the [Release](https://github.com/SergeantSerk/MCQuery/releases) page, or download the MCQuery NuGet package from nuget.org using Visual Studio's NuGet Package Manager.
-
 
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FSergeantSerk%2FMCQuery.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FSergeantSerk%2FMCQuery?ref=badge_large)
