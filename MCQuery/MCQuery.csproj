@@ -5,7 +5,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>MCQuery.pfx</AssemblyOriginatorKeyFile>
     <DelaySign>true</DelaySign>
-    <Version>0.2.1</Version>
+    <Version>0.3</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyVersion>0.0.1.0</AssemblyVersion>
     <FileVersion>0.0.1.0</FileVersion>
