@@ -23,6 +23,12 @@ namespace MCQueryTests
         }
 
         [TestMethod]
+        public void StatusTest()
+        {
+
+        }
+
+        [TestMethod]
         public void WriteVarIntTest()
         {
             int[] testCases = new[]
