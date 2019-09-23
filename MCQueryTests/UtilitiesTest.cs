@@ -12,6 +12,7 @@ namespace MCQueryTests
         [TestMethod]
         public void PingTest()
         {
+            // Note: make a better test with TcpListener and some fake handshake to test this method
             string address = "mc.hypixel.net";
             ushort port = 25565;
             MCServer server = new MCServer(address, port);
@@ -25,7 +26,15 @@ namespace MCQueryTests
         [TestMethod]
         public void StatusTest()
         {
-
+            // Note: make a better test with TcpListener and some fake handshake to test this method
+            string address = "mc.hypixel.net";
+            ushort port = 25565;
+            MCServer server = new MCServer(address, port);
+            string json = server.Status();
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                throw new InvalidDataException("Returned JSON was empty.");
+            }
         }
 
         [TestMethod]
