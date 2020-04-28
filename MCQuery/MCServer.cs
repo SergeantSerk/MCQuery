@@ -21,7 +21,7 @@ namespace MCQuery
         /// <summary>
         /// Port of the Minecraft server.
         /// </summary>
-        public ushort Port { get; private set; }
+        public int Port { get; private set; }
 
         /// <summary>
         /// Protocol number for latest, stable Minecraft.
@@ -29,13 +29,22 @@ namespace MCQuery
         public int Protocol { get; private set; }
 
         #region Public Methods
-        public MCServer(string Address, ushort Port) : this(Address, Port, -1)
+        public MCServer(string Address, int Port) : this(Address, Port, -1)
         {
 
         }
 
-        public MCServer(string Address, ushort Port, int Protocol)
+        public MCServer(string Address, int Port, int Protocol)
         {
+            if (Port < 0 || Port > 65535)
+            {
+                throw new ArgumentOutOfRangeException("Port is out of range (must be between 0 and 65535)");
+            }
+            else if (Protocol < -1)
+            {
+                throw new ArgumentOutOfRangeException("Protocol version cannot be less than -1");
+            }
+
             this.Address = Address;
             this.Port = Port;
             this.Protocol = Protocol;
@@ -94,6 +103,7 @@ namespace MCQuery
         }
         #endregion
 
+        #region Private Methods
         /// <summary>
         /// Initialise a connection to the specified server and set up connection by performing a handshake.
         /// </summary>
@@ -280,5 +290,6 @@ namespace MCQuery
             }
             return json;
         }
+        #endregion
     }
 }
