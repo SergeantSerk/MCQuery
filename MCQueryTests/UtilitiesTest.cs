@@ -64,7 +64,7 @@ namespace MCQueryTests
             }
             // Don't catch JsonException, test will detect this throw
             // Parse to expected minimal server status
-            var json = JsonSerializer.Deserialize<ServerStatus>(response);
+            _ = JsonSerializer.Deserialize<ServerStatus>(response);
         }
 
         [TestMethod]

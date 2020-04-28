@@ -2,7 +2,7 @@
 
 namespace MCQueryTests
 {
-    public partial class ServerStatus
+    internal class ServerStatus
     {
         // Don't care about description, this changes over different server
 
@@ -13,7 +13,7 @@ namespace MCQueryTests
         public Version Version { get; set; }
     }
 
-    public partial class Players
+    internal class Players
     {
         [JsonPropertyName("max")]
         public long Max { get; set; }
@@ -22,7 +22,7 @@ namespace MCQueryTests
         public long Online { get; set; }
     }
 
-    public partial class Version
+    internal class Version
     {
         [JsonPropertyName("name")]
         public string Name { get; set; }
