@@ -110,13 +110,15 @@ namespace MCQuery
         /// <returns>A <see cref="TcpClient"/> is returned which has an initialised connection that is set up.</returns>
         private TcpClient InitialiseConnection(int state, int timeout = 5000)
         {
-            TcpClient client = new TcpClient
-            {
-                ReceiveTimeout = timeout,
-                SendTimeout = timeout
-            };
+            TcpClient client = new TcpClient();
             client.Client.Blocking = true;
-            client.Connect(Address, Port);
+            var result = client.BeginConnect(Address, Port, null, null);
+            result.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(timeout));
+            if (!client.Connected)
+            {
+                throw new TimeoutException("Connection to host timed out");
+            }
+            //client.Connect(Address, Port);
             Handshake(client.GetStream(), state);
             return client;
         }
@@ -126,8 +128,6 @@ namespace MCQuery
         /// </summary>
         /// <param name="network">A connected network stream with the server.</param>
         /// <param name="state">The state command that follows after this handshake (usually 1 for status, 2 for login).</param>
-        /// <param name="server">The server to handshake with.</param>
-        /// <param name="port">The port of the Minecraft server.</param>
         private void Handshake(NetworkStream network, int state)
         {
             using (MemoryStream packet = new MemoryStream())
@@ -141,7 +141,7 @@ namespace MCQuery
                     // Server address
                     data.Write(Encoding.ASCII.GetBytes(Address));
                     // Server port
-                    data.Write(BitConverter.GetBytes(Port));
+                    data.Write(BitConverter.GetBytes((ushort)Port));
                     // State command
                     Utilities.WriteVarInt(data, state);
                 }
