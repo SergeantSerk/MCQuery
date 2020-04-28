@@ -3,20 +3,47 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 
 namespace MCQueryTests
 {
     [TestClass]
     public class UtilitiesTest
     {
+        private readonly int[] intTestCases = new[]
+            {
+                0,
+                1,
+                2,
+                127,
+                128,
+                255,
+                2147483647,
+                -1,
+                -2147483648
+            };
+
+        private readonly byte[][] byteArrayTestCases = new byte[][]
+{
+                new byte[] { 0x00 },                            // VarInt(0)
+                new byte[] { 0x01 },                            // VarInt(1)
+                new byte[] { 0x02 },                            // VarInt(2)
+                new byte[] { 0x7F },                            // VarInt(127)
+                new byte[] { 0x80, 0x01 },                      // VarInt(128)
+                new byte[] { 0xFF, 0x01 },                      // VarInt(255)
+                new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x07 },    // VarInt(2147483647)
+                new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, },   // VarInt(-1)
+                new byte[] { 0x80, 0x80, 0x80, 0x80, 0x08 }     // VarInt(-2147483648)
+};
+
         [TestMethod]
         public void PingTest()
         {
             // Note: make a better test with TcpListener and some fake handshake to test this method
-            string address = "mc.hypixel.net";
-            ushort port = 25565;
-            MCServer server = new MCServer(address, port);
-            double ping = server.Ping();
+            var address = "mc.hypixel.net";
+            var port = 25565;
+            var server = new MCServer(address, port);
+            var ping = server.Ping();
             if (ping <= 0)
             {
                 throw new InvalidDataException("Ping cannot be equal to or less than 0.");
@@ -27,54 +54,32 @@ namespace MCQueryTests
         public void StatusTest()
         {
             // Note: make a better test with TcpListener and some fake handshake to test this method
-            string address = "mc.hypixel.net";
-            ushort port = 25565;
-            MCServer server = new MCServer(address, port);
-            string json = server.Status();
-            if (string.IsNullOrWhiteSpace(json))
+            var address = "mc.hypixel.net";
+            var port = 25565;
+            var server = new MCServer(address, port);
+            var response = server.Status();
+            if (string.IsNullOrWhiteSpace(response))
             {
                 throw new InvalidDataException("Returned JSON was empty.");
             }
+            // Don't catch JsonException, test will detect this throw
+            // Parse to expected minimal server status
+            var json = JsonSerializer.Deserialize<ServerStatus>(response);
         }
 
         [TestMethod]
         public void WriteVarIntTest()
         {
-            int[] testCases = new[]
-            {
-                0,
-                1,
-                2,
-                127,
-                128,
-                255,
-                2147483647,
-                -1,
-                -2147483648
-            };
-            byte[][] testCasesResults = new byte[][]
-            {
-                new byte[] { 0x00 },                            // VarInt(0)
-                new byte[] { 0x01 },                            // VarInt(1)
-                new byte[] { 0x02 },                            // VarInt(2)
-                new byte[] { 0x7F },                            // VarInt(127)
-                new byte[] { 0x80, 0x01 },                      // VarInt(128)
-                new byte[] { 0xFF, 0x01 },                      // VarInt(255)
-                new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x07 },    // VarInt(2147483647)
-                new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, },   // VarInt(-1)
-                new byte[] { 0x80, 0x80, 0x80, 0x80, 0x08 }     // VarInt(-2147483648)
-            };
-
             using (MemoryStream memory = new MemoryStream())
             {
-                for (int i = 0; i < testCases.Length; ++i)
+                for (int i = 0; i < intTestCases.Length; ++i)
                 {
                     memory.SetLength(0);                                // Reset stream
-                    Utilities.WriteVarInt(memory, testCases[i]);        // Write integer (VarInt) to stream
+                    Utilities.WriteVarInt(memory, intTestCases[i]);     // Write integer (VarInt) to stream
                     byte[] result = memory.ToArray();
-                    if (!testCasesResults[i].SequenceEqual(result))
+                    if (!byteArrayTestCases[i].SequenceEqual(result))
                     {
-                        Assert.Fail($"Expected {BitConverter.ToString(testCasesResults[i])}, got {BitConverter.ToString(result)}");
+                        Assert.Fail($"Expected {BitConverter.ToString(byteArrayTestCases[i])}, got {BitConverter.ToString(result)}");
                     }
                 }
             }
@@ -83,39 +88,14 @@ namespace MCQueryTests
         [TestMethod]
         public void ReadVarIntTest()
         {
-            byte[][] testCases = new byte[][]
-            {
-                new byte[] { 0x00 },                            // VarInt(0)
-                new byte[] { 0x01 },                            // VarInt(1)
-                new byte[] { 0x02 },                            // VarInt(2)
-                new byte[] { 0x7F },                            // VarInt(127)
-                new byte[] { 0x80, 0x01 },                      // VarInt(128)
-                new byte[] { 0xFF, 0x01 },                      // VarInt(255)
-                new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x07 },    // VarInt(2147483647)
-                new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, },   // VarInt(-1)
-                new byte[] { 0x80, 0x80, 0x80, 0x80, 0x08 }     // VarInt(-2147483648)
-            };
-            int[] testCasesResults = new[]
-            {
-                0,
-                1,
-                2,
-                127,
-                128,
-                255,
-                2147483647,
-                -1,
-                -2147483648
-            };
-
             using (MemoryStream memory = new MemoryStream())
             {
-                for (int i = 0; i < testCases.Length; ++i)
+                for (int i = 0; i < byteArrayTestCases.Length; ++i)
                 {
-                    int result = ReadVarIntHelper(memory, testCases[i]);
-                    if (result != testCasesResults[i])
+                    var result = ReadVarIntHelper(memory, byteArrayTestCases[i]);
+                    if (result != intTestCases[i])
                     {
-                        Assert.Fail($"Expected {testCasesResults[i]}, got {result}.");
+                        Assert.Fail($"Expected {intTestCases[i]}, got {result}.");
                     }
                 }
             }

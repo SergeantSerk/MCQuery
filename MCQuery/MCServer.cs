@@ -149,7 +149,7 @@ namespace MCQuery
         {
             if (network == null)
             {
-                throw new ArgumentNullException("Cannot send status request to a null network stream");
+                throw new ArgumentNullException("Cannot perform handshake with a null network stream");
             }
             else if (!network.CanWrite)
             {
@@ -171,16 +171,9 @@ namespace MCQuery
                     // State command
                     Utilities.WriteVarInt(data, state);
                 }
-                // Write packet length (Packet ID + Inner Packet)
-                Utilities.WriteVarInt(packet, (int)data.Length + 1);
-                // Packet ID (0 = Handshake at this state)
-                Utilities.WriteVarInt(packet, 0);
-                // Seek to beginning and copy inner packet to actual packet
-                data.Seek(0, SeekOrigin.Begin);
-                data.CopyTo(packet);
-                // Seek to beginning and transmit packet to server
-                packet.Seek(0, SeekOrigin.Begin);
-                packet.CopyTo(network);
+                // Append data to packet and send to network
+                // (Packet ID 0 = Handshake at this state)
+                SendConstructedPacket(network, packet, data, 0);
             }
         }
 
@@ -285,16 +278,7 @@ namespace MCQuery
             using (MemoryStream data = new MemoryStream())
             {
                 // No data, only packet ID to indicate status request
-                // Packet ID + Packet
-                Utilities.WriteVarInt(packet, (int)data.Length + 1);
-                // Packet ID
-                Utilities.WriteVarInt(packet, 0);
-                // Seek to beginning and copy inner packet to actual packet
-                data.Seek(0, SeekOrigin.Begin);
-                data.CopyTo(packet);
-                // Seek to beginning and transmit packet to server
-                packet.Seek(0, SeekOrigin.Begin);
-                packet.CopyTo(network);
+                SendConstructedPacket(network, packet, data, 0);
             }
         }
 
@@ -352,6 +336,20 @@ namespace MCQuery
                 json = Encoding.UTF8.GetString(responseBytes);
             }
             return json;
+        }
+
+        private static void SendConstructedPacket(NetworkStream network, MemoryStream packet, MemoryStream data, int packetId)
+        {
+            // Write packet length (Packet ID + Inner Packet)
+            Utilities.WriteVarInt(packet, (int)data.Length + 1);
+            // Packet ID
+            Utilities.WriteVarInt(packet, packetId);
+            // Seek to beginning and copy inner packet to actual packet
+            data.Seek(0, SeekOrigin.Begin);
+            data.CopyTo(packet);
+            // Seek to beginning and transmit packet to server
+            packet.Seek(0, SeekOrigin.Begin);
+            packet.CopyTo(network);
         }
         #endregion
     }
