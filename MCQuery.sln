@@ -3,7 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MCQuery", "MCQuery\MCQuery.csproj", "{FF9AA778-B332-4371-A556-89CACCCE6465}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MCQueryTests", "MCQueryTests\MCQueryTests.csproj", "{3A67F54F-63E2-4A01-918F-7C4E0E806815}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF9AA778-B332-4371-A556-89CACCCE6465}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF9AA778-B332-4371-A556-89CACCCE6465}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF9AA778-B332-4371-A556-89CACCCE6465}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF9AA778-B332-4371-A556-89CACCCE6465}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A67F54F-63E2-4A01-918F-7C4E0E806815}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A67F54F-63E2-4A01-918F-7C4E0E806815}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A67F54F-63E2-4A01-918F-7C4E0E806815}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A67F54F-63E2-4A01-918F-7C4E0E806815}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
