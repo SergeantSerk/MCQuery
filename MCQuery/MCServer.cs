@@ -53,9 +53,9 @@ namespace MCQuery
         /// <summary>
         /// Pings the specified server.
         /// </summary>
-        /// <param name="Timeout">Timeout period </param>
+        /// <param name="Timeout">Timeout duration for connecting with the host.</param>
         /// <returns>The elapsed time between sending the ping and receiving the ping, in milliseconds.</returns>
-        public double Ping(int Timeout = 5000)
+        public double Ping(int Timeout)
         {
             double ping;
             // Attempt to ping, without requesting status (this does not work on some servers)
@@ -84,11 +84,20 @@ namespace MCQuery
         }
 
         /// <summary>
+        /// Pings the specified server, with default timeout duration of 5 seconds.
+        /// </summary>
+        /// <returns>The elapsed time between sending the ping and receiving the ping, in milliseconds.</returns>
+        public double Ping()
+        {
+            return Ping(5000);
+        }
+
+        /// <summary>
         /// Queries the specified server.
         /// </summary>
-        /// <param name="Timeout">Timeout period </param>
+        /// <param name="Timeout">Timeout duration for connecting with the host.</param>
         /// <returns>The query response, in JSON.</returns>
-        public string Status(int Timeout = 5000)
+        public string Status(int Timeout)
         {
             string json = string.Empty;
             using (TcpClient client = InitialiseConnection(1, Timeout))
@@ -98,6 +107,15 @@ namespace MCQuery
                 json = ReceiveStatusRequest(network);
             }
             return json;
+        }
+
+        /// <summary>
+        /// Queries the specified server, with default timeout duration of 5 seconds.
+        /// </summary>
+        /// <returns>The query response, in JSON.</returns>
+        public string Status()
+        {
+            return Status(5000);
         }
         #endregion
 
@@ -129,6 +147,15 @@ namespace MCQuery
         /// <param name="state">The state command that follows after this handshake (usually 1 for status, 2 for login).</param>
         private void Handshake(NetworkStream network, int state)
         {
+            if (network == null)
+            {
+                throw new ArgumentNullException("Cannot send status request to a null network stream");
+            }
+            else if (!network.CanWrite)
+            {
+                throw new IOException("Cannot write to this network stream");
+            }
+
             using (MemoryStream packet = new MemoryStream())
             using (MemoryStream data = new MemoryStream())
             {
@@ -159,6 +186,15 @@ namespace MCQuery
 
         private void SendPing(NetworkStream network)
         {
+            if (network == null)
+            {
+                throw new ArgumentNullException("Cannot send ping to a null network stream");
+            }
+            else if (!network.CanWrite)
+            {
+                throw new IOException("Cannot write to this network stream");
+            }
+
             // Prepare new stopwatch for measuring ping
             stopwatch = new Stopwatch();
             using (MemoryStream packet = new MemoryStream())
@@ -189,6 +225,15 @@ namespace MCQuery
 
         private double ReceivePing(NetworkStream network)
         {
+            if (network == null)
+            {
+                throw new ArgumentNullException("Cannot receive ping from a null network stream");
+            }
+            else if (!network.CanRead)
+            {
+                throw new IOException("Cannot read from this network stream");
+            }
+
             // Store ping for return
             double ping;
             using (MemoryStream packet = new MemoryStream())
@@ -224,8 +269,17 @@ namespace MCQuery
         /// Sends a status request to the connected network stream. (https://wiki.vg/Protocol#Status)
         /// </summary>
         /// <param name="network">The network stream that is connected to the Minecraft server.</param>
-        private void SendStatusRequest(NetworkStream network)
+        private static void SendStatusRequest(NetworkStream network)
         {
+            if (network == null)
+            {
+                throw new ArgumentNullException("Cannot send status request to a null network stream");
+            }
+            else if (!network.CanWrite)
+            {
+                throw new IOException("Cannot write to this network stream");
+            }
+
             // Initialise packet construction
             using (MemoryStream packet = new MemoryStream())
             using (MemoryStream data = new MemoryStream())
@@ -244,8 +298,17 @@ namespace MCQuery
             }
         }
 
-        private string ReceiveStatusRequest(NetworkStream network)
+        private static string ReceiveStatusRequest(NetworkStream network)
         {
+            if (network == null)
+            {
+                throw new ArgumentNullException("Cannot receive status request from a null network stream");
+            }
+            else if (!network.CanRead)
+            {
+                throw new IOException("Cannot read from this network stream");
+            }
+
             string json = string.Empty;
             using (MemoryStream packet = new MemoryStream())
             using (MemoryStream data = new MemoryStream())
