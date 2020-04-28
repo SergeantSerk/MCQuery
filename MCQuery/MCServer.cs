@@ -118,7 +118,6 @@ namespace MCQuery
             {
                 throw new TimeoutException("Connection to host timed out");
             }
-            //client.Connect(Address, Port);
             Handshake(client.GetStream(), state);
             return client;
         }
