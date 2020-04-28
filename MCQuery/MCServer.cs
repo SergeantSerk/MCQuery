@@ -53,16 +53,15 @@ namespace MCQuery
         /// <summary>
         /// Pings the specified server.
         /// </summary>
-        /// <param name="server">The server address to query.</param>
-        /// <param name="port">The port the Minecraft server is running on.</param>
+        /// <param name="Timeout">Timeout period </param>
         /// <returns>The elapsed time between sending the ping and receiving the ping, in milliseconds.</returns>
-        public double Ping()
+        public double Ping(int Timeout = 5000)
         {
             double ping;
             // Attempt to ping, without requesting status (this does not work on some servers)
             try
             {
-                using (TcpClient client = InitialiseConnection(1))
+                using (TcpClient client = InitialiseConnection(1, Timeout))
                 using (NetworkStream network = client.GetStream())
                 {
                     SendPing(network);
@@ -72,7 +71,7 @@ namespace MCQuery
             catch (Exception)
             {
                 // If server requires status request first, send that, then ping
-                using (TcpClient client = InitialiseConnection(1))
+                using (TcpClient client = InitialiseConnection(1, Timeout))
                 using (NetworkStream network = client.GetStream())
                 {
                     SendStatusRequest(network);
@@ -87,13 +86,12 @@ namespace MCQuery
         /// <summary>
         /// Queries the specified server.
         /// </summary>
-        /// <param name="server">The server address to query.</param>
-        /// <param name="port">The port the Minecraft server is running on.</param>
+        /// <param name="Timeout">Timeout period </param>
         /// <returns>The query response, in JSON.</returns>
-        public string Status()
+        public string Status(int Timeout = 5000)
         {
             string json = string.Empty;
-            using (TcpClient client = InitialiseConnection(1))
+            using (TcpClient client = InitialiseConnection(1, Timeout))
             using (NetworkStream network = client.GetStream())
             {
                 SendStatusRequest(network);
@@ -107,13 +105,16 @@ namespace MCQuery
         /// <summary>
         /// Initialise a connection to the specified server and set up connection by performing a handshake.
         /// </summary>
-        /// <param name="server">The server to connect and handshake with.</param>
-        /// <param name="port">The port of the Minecraft server.</param>
         /// <param name="state">The next state that should follow after the handshake, usually 1 for status, 2 for login.</param>
+        /// <param name="timeout">Timeout period of attempting to send and receive data from host.</param>
         /// <returns>A <see cref="TcpClient"/> is returned which has an initialised connection that is set up.</returns>
-        private TcpClient InitialiseConnection(int state)
+        private TcpClient InitialiseConnection(int state, int timeout = 5000)
         {
-            TcpClient client = new TcpClient();
+            TcpClient client = new TcpClient
+            {
+                ReceiveTimeout = timeout,
+                SendTimeout = timeout
+            };
             client.Client.Blocking = true;
             client.Connect(Address, Port);
             Handshake(client.GetStream(), state);
