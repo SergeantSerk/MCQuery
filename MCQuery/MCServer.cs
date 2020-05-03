@@ -53,7 +53,7 @@ namespace MCQuery
         /// <summary>
         /// Pings the specified server.
         /// </summary>
-        /// <param name="Timeout">Timeout duration for connecting with the host.</param>
+        /// <param name="Timeout">Timeout duration for connecting with the host, in milliseconds.</param>
         /// <returns>The elapsed time between sending the ping and receiving the ping, in milliseconds.</returns>
         public double Ping(int Timeout)
         {
@@ -95,7 +95,7 @@ namespace MCQuery
         /// <summary>
         /// Queries the specified server.
         /// </summary>
-        /// <param name="Timeout">Timeout duration for connecting with the host.</param>
+        /// <param name="Timeout">Timeout duration for connecting with the host, in milliseconds.</param>
         /// <returns>The query response, in JSON.</returns>
         public string Status(int Timeout)
         {
