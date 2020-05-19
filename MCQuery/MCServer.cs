@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -37,7 +38,7 @@ namespace MCQuery
 
         public MCServer(string Address, int Port, int Protocol)
         {
-            if (Port < 0 || Port > 65535)
+            if (Port < IPEndPoint.MinPort || Port > IPEndPoint.MaxPort)
             {
                 throw new ArgumentOutOfRangeException("Port is out of range (must be between 0 and 65535)");
             }
@@ -94,11 +95,12 @@ namespace MCQuery
         }
 
         /// <summary>
-        /// Queries the specified server.
+        /// Performs a standard status request to the Minecraft server but deserialises to type <typeparamref name="T"/>.
         /// </summary>
+        /// <typeparam name="T">Type to deserialise received JSON response to.</typeparam>
         /// <param name="Timeout">Timeout duration for connecting with the host, in milliseconds.</param>
-        /// <returns>The query response, in JSON.</returns>
-        public ServerStatus Status(int Timeout)
+        /// <returns>The query response as <see cref="T"/>.</returns>
+        public T Status<T>(int Timeout)
         {
             string json = string.Empty;
             using (TcpClient client = InitialiseConnection(1, Timeout))
@@ -107,14 +109,24 @@ namespace MCQuery
                 SendStatusRequest(network);
                 json = ReceiveStatusRequest(network);
             }
-            var result = JsonConvert.DeserializeObject<ServerStatus>(json);
+            var result = JsonConvert.DeserializeObject<T>(json);
             return result;
+        }
+
+        /// <summary>
+        /// Queries the specified server.
+        /// </summary>
+        /// <param name="Timeout">Timeout duration for connecting with the host, in milliseconds.</param>
+        /// <returns>The query response as <see cref="ServerStatus"/>.</returns>
+        public ServerStatus Status(int Timeout)
+        {
+            return Status<ServerStatus>(Timeout);
         }
 
         /// <summary>
         /// Queries the specified server, with default timeout duration of 5 seconds.
         /// </summary>
-        /// <returns>The query response, in JSON.</returns>
+        /// <returns>The query response as <see cref="ServerStatus"/>.</returns>
         public ServerStatus Status()
         {
             return Status(5000);
