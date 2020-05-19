@@ -165,9 +165,11 @@ namespace MCQuery
                     // Address Length
                     data.WriteByte((byte)Encoding.ASCII.GetByteCount(Address));
                     // Server address
-                    data.Write(Encoding.ASCII.GetBytes(Address));
+                    var addressBytes = Encoding.ASCII.GetBytes(Address);
+                    data.Write(addressBytes, 0, addressBytes.Length);
                     // Server port
-                    data.Write(BitConverter.GetBytes((ushort)Port));
+                    var portBytes = BitConverter.GetBytes((ushort)Port);
+                    data.Write(portBytes, 0, portBytes.Length);
                     // State command
                     Utilities.WriteVarInt(data, state);
                 }
@@ -199,7 +201,7 @@ namespace MCQuery
                     // Convert that into long bytes
                     pingBytes = BitConverter.GetBytes(ticks);
                     // Write long into data stream
-                    data.Write(pingBytes);
+                    data.Write(pingBytes, 0, pingBytes.Length);
                 }
                 // Write packet length (including packet ID)
                 Utilities.WriteVarInt(packet, (int)data.Length + 1);
@@ -243,7 +245,7 @@ namespace MCQuery
 
                 // Parse the received ping bytes
                 byte[] pongBytes = new byte[Math.Max(8, packetLength - 1)];
-                network.Read(pongBytes);
+                network.Read(pongBytes, 0, pongBytes.Length);
                 // Stop stopwatch, no need to measure from this point onwards
                 stopwatch.Stop();
                 ping = stopwatch.Elapsed.TotalMilliseconds;

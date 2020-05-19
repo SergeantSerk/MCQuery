@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace MCQueryTests
 {
@@ -6,28 +6,28 @@ namespace MCQueryTests
     {
         // Don't care about description, this changes over different server
 
-        [JsonPropertyName("players")]
+        [JsonProperty("players")]
         public Players Players { get; set; }
 
-        [JsonPropertyName("version")]
+        [JsonProperty("version")]
         public Version Version { get; set; }
     }
 
     internal class Players
     {
-        [JsonPropertyName("max")]
+        [JsonProperty("max")]
         public long Max { get; set; }
 
-        [JsonPropertyName("online")]
+        [JsonProperty("online")]
         public long Online { get; set; }
     }
 
     internal class Version
     {
-        [JsonPropertyName("name")]
+        [JsonProperty("name")]
         public string Name { get; set; }
 
-        [JsonPropertyName("protocol")]
+        [JsonProperty("protocol")]
         public long Protocol { get; set; }
     }
 }
