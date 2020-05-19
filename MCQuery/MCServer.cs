@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -97,7 +98,7 @@ namespace MCQuery
         /// </summary>
         /// <param name="Timeout">Timeout duration for connecting with the host, in milliseconds.</param>
         /// <returns>The query response, in JSON.</returns>
-        public string Status(int Timeout)
+        public ServerStatus Status(int Timeout)
         {
             string json = string.Empty;
             using (TcpClient client = InitialiseConnection(1, Timeout))
@@ -106,14 +107,15 @@ namespace MCQuery
                 SendStatusRequest(network);
                 json = ReceiveStatusRequest(network);
             }
-            return json;
+            var result = JsonConvert.DeserializeObject<ServerStatus>(json);
+            return result;
         }
 
         /// <summary>
         /// Queries the specified server, with default timeout duration of 5 seconds.
         /// </summary>
         /// <returns>The query response, in JSON.</returns>
-        public string Status()
+        public ServerStatus Status()
         {
             return Status(5000);
         }

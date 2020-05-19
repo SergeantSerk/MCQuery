@@ -58,13 +58,12 @@ namespace MCQueryTests
             var port = 25565;
             var server = new MCServer(address, port);
             var response = server.Status();
-            if (string.IsNullOrWhiteSpace(response))
+            if (response == null)
             {
-                throw new InvalidDataException("Returned JSON was empty.");
+                throw new InvalidDataException("Returned server status was empty or null.");
             }
             // Don't catch JsonException, test will detect this throw
             // Parse to expected minimal server status
-            _ = JsonConvert.DeserializeObject<ServerStatus>(response);
         }
 
         [TestMethod]

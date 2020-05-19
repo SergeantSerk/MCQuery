@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace MCQueryTests
+namespace MCQuery
 {
-    internal class ServerStatus
+    public class ServerStatus
     {
         // Don't care about description, this changes over different server
 
@@ -13,7 +13,7 @@ namespace MCQueryTests
         public Version Version { get; set; }
     }
 
-    internal class Players
+    public class Players
     {
         [JsonProperty("max")]
         public long Max { get; set; }
@@ -22,7 +22,7 @@ namespace MCQueryTests
         public long Online { get; set; }
     }
 
-    internal class Version
+    public class Version
     {
         [JsonProperty("name")]
         public string Name { get; set; }
