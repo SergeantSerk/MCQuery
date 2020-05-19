@@ -1,9 +1,9 @@
 using MCQuery;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 
 namespace MCQueryTests
 {
@@ -64,7 +64,7 @@ namespace MCQueryTests
             }
             // Don't catch JsonException, test will detect this throw
             // Parse to expected minimal server status
-            _ = JsonSerializer.Deserialize<ServerStatus>(response);
+            _ = JsonConvert.DeserializeObject<ServerStatus>(response);
         }
 
         [TestMethod]
