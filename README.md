@@ -4,7 +4,7 @@
 A C# library for querying/pinging Minecraft servers.
 
 ## Sample Usage
-See MCQueryConsole for sample console or below.
+See sample code below for basic usage.
 ```C#
 using MCQuery;
 using System;
