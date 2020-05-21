@@ -32,7 +32,7 @@ namespace Sample
 ## Installation
 Recommended way of installing is through [NuGet](https://www.nuget.org/packages/MCQuery/) where packages are updated alongside master branch.
 
-For the latest features (bleeding-edge), clone this repository and open the **`MCQuery/MCQuery.sln`** solution in Visual Studio. Build using the **Release** configuration and use the **`MCQuery/bin/Release/netcoreapp(x)/MCQuery.dll`** file in your project.
+For the latest features (bleeding-edge), clone this repository and open the **`MCQuery/MCQuery.sln`** solution in Visual Studio. Build using the **Release** configuration and use the **`MCQuery/bin/Release/netstandard2.0/MCQuery.dll`** file in your project.
 
 Alternatively, you can download the DLL (not always up-to-date) from the [Release](https://github.com/SergeantSerk/MCQuery/releases) page.
 
