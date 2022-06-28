@@ -40,7 +40,7 @@ namespace MCQueryTests
         public void PingTest()
         {
             // Note: make a better test with TcpListener and some fake handshake to test this method
-            var address = "mc.hypixel.net";
+            var address = "hub.mc-complex.com";
             var port = 25565;
             var server = new MCServer(address, port);
             var ping = server.Ping();
@@ -54,7 +54,7 @@ namespace MCQueryTests
         public void StatusTest()
         {
             // Note: make a better test with TcpListener and some fake handshake to test this method
-            var address = "mc.hypixel.net";
+            var address = "hub.mc-complex.com";
             var port = 25565;
             var server = new MCServer(address, port);
             var response = server.Status();
