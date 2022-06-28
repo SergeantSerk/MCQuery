@@ -56,8 +56,8 @@ namespace MCQuery
         /// Pings the specified server.
         /// </summary>
         /// <param name="Timeout">Timeout duration for connecting with the host, in milliseconds.</param>
-        /// <returns>The elapsed time between sending the ping and receiving the ping, in milliseconds.</returns>
-        public double Ping(int Timeout)
+        /// <returns>The elapsed time between sending the ping and receiving the ping, in milliseconds. Default 5000</returns>
+        public double Ping(int Timeout = 5000)
         {
             double ping;
             // Attempt to ping, without requesting status (this does not work on some servers)
@@ -83,15 +83,6 @@ namespace MCQuery
                 }
             }
             return ping;
-        }
-
-        /// <summary>
-        /// Pings the specified server, with default timeout duration of 5 seconds.
-        /// </summary>
-        /// <returns>The elapsed time between sending the ping and receiving the ping, in milliseconds.</returns>
-        public double Ping()
-        {
-            return Ping(5000);
         }
 
         /// <summary>
