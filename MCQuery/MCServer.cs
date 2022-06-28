@@ -98,9 +98,9 @@ namespace MCQuery
         /// Performs a standard status request to the Minecraft server but deserialises to type <typeparamref name="T"/>.
         /// </summary>
         /// <typeparam name="T">Type to deserialise received JSON response to.</typeparam>
-        /// <param name="Timeout">Timeout duration for connecting with the host, in milliseconds.</param>
+        /// <param name="Timeout">Timeout duration for connecting with the host, in milliseconds. Default 5000</param>
         /// <returns>The query response as <see cref="T"/>.</returns>
-        public T Status<T>(int Timeout)
+        public T Status<T>(int Timeout = 5000)
         {
             string json = string.Empty;
             using (TcpClient client = InitialiseConnection(1, Timeout))
@@ -116,20 +116,11 @@ namespace MCQuery
         /// <summary>
         /// Queries the specified server.
         /// </summary>
-        /// <param name="Timeout">Timeout duration for connecting with the host, in milliseconds.</param>
+        /// <param name="Timeout">Timeout duration for connecting with the host, in milliseconds. Default 5000</param>
         /// <returns>The query response as <see cref="ServerStatus"/>.</returns>
-        public ServerStatus Status(int Timeout)
+        public ServerStatus Status(int Timeout = 5000)
         {
             return Status<ServerStatus>(Timeout);
-        }
-
-        /// <summary>
-        /// Queries the specified server, with default timeout duration of 5 seconds.
-        /// </summary>
-        /// <returns>The query response as <see cref="ServerStatus"/>.</returns>
-        public ServerStatus Status()
-        {
-            return Status(5000);
         }
         #endregion
 
