@@ -109,7 +109,7 @@ namespace MCQueryTests
         private static void StreamHelper(Stream stream, byte[] data)
         {
             stream.SetLength(0);                // Reset stream
-            stream.Write(data);                 // Write test bytes
+            stream.Write(data, 0, data.Length); // Write test bytes
             stream.Seek(0, SeekOrigin.Begin);   // Go back to the start for reading
         }
     }
